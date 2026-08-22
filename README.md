@@ -1,109 +1,102 @@
-# New Nx Repository
+# EngineeringOS AI
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+**An AI-powered Engineering Intelligence Platform** — it ingests engineering work signals (GitHub,
+Jira, Teams, calendars, IDE/AI-tool usage, an optional desktop agent), correlates them into a live
+per-person / per-team **event timeline**, and uses a fleet of specialized AI agents to explain **how
+engineering execution is actually progressing** — bottlenecks, sprint risk, review overload, AI
+adoption — with **cited evidence** and actionable recommendations.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+> **Not surveillance.** No screenshots, no keystroke logging, no individual productivity scores.
+> Every signal is consent-gated and every metric is explainable. See
+> [docs/00 — Vision & Scope](./docs/00-vision-and-scope.md).
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/docs/technologies/typescript/introduction?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
-## Finish your Nx platform setup
+---
 
-🚀 [Finish setting up your workspace](https://cloud.nx.app/connect/NkUbPzrX9C) to get faster builds with remote caching, distributed task execution, and self-healing CI. [Learn more about Nx Cloud](https://nx.dev/ci/intro/why-nx-cloud).
-## Generate a library
+## 📚 Documentation
 
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+**Start here:** [`docs/README.md`](./docs/README.md) — the full documentation index.
+
+- **Foundation:** [Vision](./docs/00-vision-and-scope.md) · [PRD](./docs/01-product-requirements.md) ·
+  [Personas & RBAC](./docs/02-personas-and-rbac.md) · [Architecture](./docs/03-system-architecture.md) ·
+  [Data Model](./docs/04-data-model.md) · [API & Realtime](./docs/05-api-and-realtime.md) ·
+  [Security & Consent](./docs/06-security-privacy-consent.md) · [AI Architecture](./docs/07-ai-architecture.md)
+- **Engineering standards:** [Coding Standards](./docs/08-coding-standards.md) ·
+  [Testing Strategy](./docs/09-testing-strategy.md) ·
+  [Shared Packages & Boundaries](./docs/10-shared-packages-and-boundaries.md) ·
+  [UI/UX Design System](./docs/11-ui-ux-design-system.md)
+- **Feature plans:** [`docs/plans/`](./docs/plans/) (one per module, incl. the
+  [Roadmap](./docs/plans/00-roadmap-and-phasing.md))
+- **Deployment:** [`docs/deployment/`](./docs/deployment/) (single GCP VM, $300 free tier)
+- **Decisions:** [`docs/adr/`](./docs/adr/)
+
+## 🧱 Tech stack
+
+| Layer | Tech |
+|-------|------|
+| Monorepo | **Nx** (npm workspaces, `apps/*` + `libs/*`) |
+| Frontend | **React 19 + Vite**, TypeScript, Tailwind, shadcn/ui, TanStack Query |
+| Backend | **NestJS** (modular monolith + worker), TypeScript |
+| ORM / DB | **Sequelize + PostgreSQL** |
+| Cache / queues / bus | **Redis** (BullMQ + Streams) |
+| AI | **LangGraph.js**, Claude / OpenAI / Gemini (routed) |
+| RAG | **Qdrant** |
+| Desktop agent | **Rust** (cross-platform, opt-in) |
+| Infra | **Docker Compose** on one GCP VM (Kubernetes-ready) |
+
+## 📂 Repository layout
+
+```
+apps/
+  api/            NestJS HTTP + WebSocket app
+  worker/         NestJS headless (BullMQ processors, projections, AI agents)
+  web/            React + Vite SPA
+  desktop-agent/  Rust cross-platform agent
+libs/
+  shared/         @eos/shared-{constants,enums,types,utils}, @eos/contracts  (leaf — no framework deps)
+  backend/        @eos/{backend-core,database,events,auth,rbac,ai,integrations}
+  frontend/       @eos/{ui,frontend-data,feature-*}
+docs/             product + architecture + feature plans + deployment + ADRs
+.claude/skills/   repo-specific skills (clean-code, nx-library, nest-module, …)
 ```
 
-## Run tasks
+Dependency rule (enforced by Nx tags + `@nx/enforce-module-boundaries`): the graph is a **DAG** —
+`shared/*` is the leaf, `frontend` and `backend` never import each other (they meet at `@eos/contracts`),
+feature libs never import each other. See [docs/10](./docs/10-shared-packages-and-boundaries.md). This is
+how we guarantee **no circular dependencies** (which otherwise break Docker/prod builds).
 
-To build the library use:
+## 🚀 Getting started (local)
 
-```sh
-npx nx run pkg1:build
+> The app scaffolding (apps/libs) is built out per the [Roadmap](./docs/plans/00-roadmap-and-phasing.md).
+> This repo currently contains the Nx workspace + full design docs.
+
+```bash
+# 1. Install
+npm install
+
+# 2. Environment — copy the example and fill in real values (never commit .env)
+cp .env.example .env
+
+# 3. Start infra (Postgres, Redis, Qdrant, MinIO) for local dev
+docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
+
+# 4. Explore the workspace
+npx nx graph            # visualize the dependency DAG
+npx nx run-many -t lint test build
 ```
 
-To run any task with Nx use:
+## 🔒 Security & secrets
 
-```sh
-npx nx run <project-name>:<target>
-```
+- **Never commit secrets.** Only `.env.example` (placeholders) is tracked; `.env` and all key files are
+  gitignored. See [docs/06](./docs/06-security-privacy-consent.md).
+- Report vulnerabilities privately (see `SECURITY.md` once published).
 
-These targets are either [inferred automatically](https://nx.dev/docs/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+## 🤝 Contributing
 
-[More about running tasks in the docs &raquo;](https://nx.dev/docs/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Read [docs/08 — Coding Standards](./docs/08-coding-standards.md) and the
+[`.claude/skills/`](./.claude/skills/README.md) before writing code. Every PR must pass
+`nx affected -t lint test build`, keep the dependency graph acyclic, and include tests
+([docs/09](./docs/09-testing-strategy.md)).
 
-## Versioning and releasing
+---
 
-To version and release the library use
-
-```
-npx nx release
-```
-
-Pass `--dry-run` to see what would happen without actually releasing the library.
-
-[Learn more about Nx release &raquo;](https://nx.dev/docs/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Keep TypeScript project references up to date
-
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
-
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
-
-```sh
-npx nx sync
-```
-
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
-
-```sh
-npx nx sync:check
-```
-
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
-
-## Nx Cloud
-
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/docs/features/ci-features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/docs/features/ci-features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/docs/features/ci-features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/docs/features/ci-features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Set up CI (non-Github Actions CI)
-
-**Note:** This is only required if your CI provider is not GitHub Actions.
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/docs/features/ci-features?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/docs/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## 🔗 Learn More
-
-- [Nx Documentation](https://nx.dev/docs)
-- [Crafting Your Workspace Tutorial](https://nx.dev/docs/getting-started/tutorials/crafting-your-workspace)
-- [Module Boundaries](https://nx.dev/docs/features/enforce-module-boundaries)
-- [Releasing Packages](https://nx.dev/docs/features/manage-releases)
-- [Nx Plugins](https://nx.dev/docs/concepts/nx-plugins)
-- [Nx Cloud](https://nx.dev/nx-cloud)
-
-## 💬 Community
-
-Join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [X (Twitter)](https://twitter.com/nxdevtools)
-- [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [YouTube](https://www.youtube.com/@nxdevtools)
-- [Blog](https://nx.dev/blog)
+_Built with Nx. License: proprietary (UNLICENSED)._

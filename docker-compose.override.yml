@@ -1,0 +1,38 @@
+# Local development overrides — auto-merged by `docker compose up` when this
+# file sits next to docker-compose.yml. Exposes datastore ports on localhost
+# for debugging (psql, redis-cli) and the API/web ports directly, bypassing
+# Caddy for faster local iteration. NOT used in production (docs/deployment/00).
+#
+# `internal: true` on the `internal` network (docker-compose.yml) is a real
+# production security boundary — it stops Docker from publishing ANY port
+# for containers attached only to that network, by design. Local dev needs
+# host access to those same containers for debugging, so this override
+# relaxes just that flag; production never loads this file.
+networks:
+  internal:
+    internal: false
+
+services:
+  postgres:
+    # Host ports 5432/5433 are taken by other local projects; use 5434 here.
+    ports:
+      - '127.0.0.1:5434:5432'
+
+  redis:
+    # Host ports 6379/6380/6389 are taken by other local projects; use 6381 here.
+    ports:
+      - '127.0.0.1:6381:6379'
+
+  api:
+    ports:
+      - '127.0.0.1:3000:3000'
+    environment:
+      NODE_ENV: development
+
+  worker:
+    environment:
+      NODE_ENV: development
+
+  web:
+    ports:
+      - '127.0.0.1:4200:8080'

@@ -2,5 +2,42 @@
   "extends": "./tsconfig.base.json",
   "compileOnSave": false,
   "files": [],
-  "references": []
+  "references": [
+    {
+      "path": "./apps/api-e2e"
+    },
+    {
+      "path": "./apps/api"
+    },
+    {
+      "path": "./apps/worker"
+    },
+    {
+      "path": "./apps/web"
+    },
+    {
+      "path": "./libs/shared/enums"
+    },
+    {
+      "path": "./libs/shared/types"
+    },
+    {
+      "path": "./libs/shared/constants"
+    },
+    {
+      "path": "./libs/shared/contracts"
+    },
+    {
+      "path": "./libs/shared/utils"
+    },
+    {
+      "path": "./libs/backend/core"
+    },
+    {
+      "path": "./libs/backend/database"
+    },
+    {
+      "path": "./libs/backend/auth"
+    }
+  ]
 }

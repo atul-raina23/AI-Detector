@@ -1,0 +1,17 @@
+{
+	# Set CADDY_DOMAIN in .env for production auto-HTTPS (docs/deployment/00 §4).
+	# Falls back to plain HTTP on :80 for local/dev use.
+	email admin@example.com
+}
+
+:80 {
+	encode gzip
+
+	handle /api/* {
+		reverse_proxy api:3000
+	}
+
+	handle {
+		reverse_proxy web:8080
+	}
+}

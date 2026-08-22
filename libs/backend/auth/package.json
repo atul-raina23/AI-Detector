@@ -1,0 +1,33 @@
+{
+  "name": "@eos/auth",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@eos/backend-core": "*",
+    "@eos/contracts": "*",
+    "@eos/database": "*",
+    "@eos/shared-constants": "*",
+    "@eos/shared-enums": "*",
+    "@eos/shared-types": "*",
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/jwt": "11.0.2",
+    "argon2": "0.44.0"
+  },
+  "nx": {
+    "tags": [
+      "scope:backend",
+      "type:feature"
+    ]
+  }
+}

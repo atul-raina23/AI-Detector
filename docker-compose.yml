@@ -1,0 +1,132 @@
+# Production-shaped topology for a single GCP VM (docs/deployment/00, /01).
+# Qdrant + MinIO are added in Phase 2/3 (RAG, reports) — see docs/plans/00-roadmap-and-phasing.md.
+name: eos
+
+x-logging: &default-logging
+  driver: json-file
+  options: { max-size: '10m', max-file: '3' }
+
+networks:
+  edge: # only caddy binds a host port
+    driver: bridge
+  internal: # app <-> datastores; not reachable from the host
+    driver: bridge
+    internal: true
+
+volumes:
+  pg-data:
+  redis-data:
+  caddy-data:
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    networks: [internal]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-eos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-engineeringos}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-eos}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: *default-logging
+    mem_limit: 512m
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks: [internal]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: *default-logging
+    mem_limit: 256m
+
+  migrate:
+    # Targets the `build` stage (full workspace source + devDependencies,
+    # incl. tsx) rather than the pruned runtime image, which only contains
+    # the bundled app and has no migration source files to run.
+    image: ${MIGRATE_IMAGE:-eos-migrate}:${TAG:-local}
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: build
+      args: { APP: api }
+    working_dir: /workspace
+    command: ['npx', 'tsx', 'libs/backend/database/src/migrate.ts', 'up']
+    networks: [internal]
+    env_file: .env
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: 'no'
+
+  api:
+    image: ${API_IMAGE:-eos-api}:${TAG:-local}
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      args: { APP: api }
+    restart: unless-stopped
+    networks: [internal]
+    env_file: .env
+    environment:
+      PORT: 3000
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+    logging: *default-logging
+    mem_limit: 512m
+
+  worker:
+    image: ${WORKER_IMAGE:-eos-worker}:${TAG:-local}
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      args: { APP: worker }
+    restart: unless-stopped
+    networks: [internal]
+    env_file: .env
+    environment:
+      PORT: 3000
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+    logging: *default-logging
+    mem_limit: 512m
+
+  web:
+    image: ${WEB_IMAGE:-eos-web}:${TAG:-local}
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    networks: [internal]
+    logging: *default-logging
+    mem_limit: 128m
+
+  caddy:
+    image: caddy:2.9-alpine
+    restart: unless-stopped
+    networks: [edge, internal]
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./deployment/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on:
+      api: { condition: service_healthy }
+      web: { condition: service_healthy }
+    logging: *default-logging
+    mem_limit: 128m

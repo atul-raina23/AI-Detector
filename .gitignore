@@ -48,3 +48,47 @@ Thumbs.db
 .nx/polygraph
 .nx/self-healing
 .nx/migrate-runs
+
+# ---------------------------------------------------------------------------
+# Secrets & environment — NEVER commit real values.
+# Only `.env.example` files (placeholders) are tracked. See docs/06.
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.pem
+*.key
+*.p12
+secrets/
+
+# Service-account / cloud credentials
+gcp-*.json
+service-account*.json
+credentials.json
+
+# ---------------------------------------------------------------------------
+# Stray AI-tool scaffolding (kept local, never tracked)
+# ---------------------------------------------------------------------------
+.agents/
+.codex/
+.cursor/
+.gemini/
+.opencode/
+opencode.json
+AGENTS.md
+GEMINI.md
+.aider*
+.continue/
+
+# ---------------------------------------------------------------------------
+# Build / test / tooling artifacts
+# ---------------------------------------------------------------------------
+*.log
+coverage/
+.turbo/
+playwright-report/
+test-results/
+*.tsbuildinfo
+vite.config.*.timestamp*
+test-output

@@ -1,0 +1,121 @@
+/* Self-hosted variable fonts — no runtime CDN (docs/06, docs/11 §4.1) */
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/manrope';
+
+@import 'tailwindcss';
+
+/*
+ * Design tokens — see docs/11-ui-ux-design-system.md §3 (Color System).
+ * Every component MUST consume these variables (via the Tailwind theme
+ * mapping below), never hardcode a hex value.
+ */
+:root {
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --font-display: 'Manrope Variable', var(--font-sans);
+
+  /* Light theme (default) */
+  --eos-background: #f6f8fa;
+  --eos-surface: #ffffff;
+  --eos-elevated: #ffffff;
+  --eos-border: #e2e8f0;
+  --eos-border-strong: #cbd5e1;
+  --eos-text: #0f172a;
+  --eos-text-secondary: #475569;
+  --eos-text-muted: #64748b;
+  --eos-primary: #0f766e;
+  --eos-primary-foreground: #ffffff;
+  --eos-accent: #6e56cf;
+  --eos-accent-foreground: #ffffff;
+  --eos-success: #16a34a;
+  --eos-warning: #b45309;
+  --eos-danger: #dc2626;
+  --eos-info: #0284c7;
+  --eos-ring: #0f766e;
+}
+
+:root[data-theme='dark'] {
+  --eos-background: #0b0f14;
+  --eos-surface: #111721;
+  --eos-elevated: #1a2230;
+  --eos-border: #222e3d;
+  --eos-border-strong: #33475e;
+  --eos-text: #e6edf3;
+  --eos-text-secondary: #9ba8b7;
+  --eos-text-muted: #7c8b9e;
+  --eos-primary: #2dd4bf;
+  --eos-primary-foreground: #04211d;
+  --eos-accent: #a78bfa;
+  --eos-accent-foreground: #1b1636;
+  --eos-success: #22c55e;
+  --eos-warning: #fbbf24;
+  --eos-danger: #f87171;
+  --eos-info: #38bdf8;
+  --eos-ring: #2dd4bf;
+}
+
+/* Default to OS preference when the user hasn't explicitly chosen a theme
+   (the toggle stamps data-theme and always wins — see docs/11 §7.1). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --eos-background: #0b0f14;
+    --eos-surface: #111721;
+    --eos-elevated: #1a2230;
+    --eos-border: #222e3d;
+    --eos-border-strong: #33475e;
+    --eos-text: #e6edf3;
+    --eos-text-secondary: #9ba8b7;
+    --eos-text-muted: #7c8b9e;
+    --eos-primary: #2dd4bf;
+    --eos-primary-foreground: #04211d;
+    --eos-accent: #a78bfa;
+    --eos-accent-foreground: #1b1636;
+    --eos-success: #22c55e;
+    --eos-warning: #fbbf24;
+    --eos-danger: #f87171;
+    --eos-info: #38bdf8;
+    --eos-ring: #2dd4bf;
+  }
+}
+
+@theme inline {
+  --color-background: var(--eos-background);
+  --color-surface: var(--eos-surface);
+  --color-elevated: var(--eos-elevated);
+  --color-border: var(--eos-border);
+  --color-border-strong: var(--eos-border-strong);
+  --color-text: var(--eos-text);
+  --color-text-secondary: var(--eos-text-secondary);
+  --color-text-muted: var(--eos-text-muted);
+  --color-primary: var(--eos-primary);
+  --color-primary-foreground: var(--eos-primary-foreground);
+  --color-accent: var(--eos-accent);
+  --color-accent-foreground: var(--eos-accent-foreground);
+  --color-success: var(--eos-success);
+  --color-warning: var(--eos-warning);
+  --color-danger: var(--eos-danger);
+  --color-info: var(--eos-info);
+  --color-ring: var(--eos-ring);
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+}
+
+@layer base {
+  * {
+    border-color: var(--eos-border);
+  }
+  body {
+    background-color: var(--eos-background);
+    color: var(--eos-text);
+    font-family: var(--font-sans);
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+  }
+  :focus-visible {
+    outline: 2px solid var(--eos-ring);
+    outline-offset: 2px;
+  }
+}
