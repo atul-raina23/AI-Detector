@@ -1,4 +1,5 @@
 # Dashboard Widget
 
 - [x] KPI tile layout
-- [ ] Live data hook
+- [x] Live data hook
+- [ ] Loading/empty states
