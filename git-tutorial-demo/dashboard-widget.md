@@ -1,3 +1,4 @@
 # Dashboard Widget
 
-- [ ] KPI tile layout
+- [x] KPI tile layout
+- [ ] Live data hook
