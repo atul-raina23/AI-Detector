@@ -4,6 +4,8 @@ import { DatabaseModule } from '@eos/database';
 import { AUTH } from '@eos/shared-constants';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
+import { AvatarController } from './avatar.controller.js';
+import { AvatarService } from './avatar.service.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
 
 @Module({
@@ -14,8 +16,8 @@ import { JwtAuthGuard } from './jwt-auth.guard.js';
       signOptions: { expiresIn: AUTH.ACCESS_TOKEN_TTL_SECONDS },
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtAuthGuard],
+  controllers: [AuthController, AvatarController],
+  providers: [AuthService, AvatarService, JwtAuthGuard],
   exports: [AuthService, JwtAuthGuard],
 })
 export class AuthModule {}
