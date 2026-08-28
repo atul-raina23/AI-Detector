@@ -63,6 +63,10 @@ interface AuthTokens {
 export function AuthTestPage() {
   const [tokens, setTokens] = useState<AuthTokens | null>(null);
   const [log, setLog] = useState<string>('');
+  const [avatarUrlInput, setAvatarUrlInput] = useState(
+    'https://api.dicebear.com/9.x/identicon/png?seed=ada',
+  );
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   const [signupForm, setSignupForm] = useState({
     organizationName: 'Acme Inc',
@@ -89,6 +93,23 @@ export function AuthTestPage() {
       setTokens(data);
     }
     return data;
+  }
+
+  async function uploadAvatar() {
+    if (!tokens) return;
+    const res = await fetch(`${API_BASE}/v1/users/me/avatar`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${tokens.accessToken}`,
+      },
+      body: JSON.stringify({ imageUrl: avatarUrlInput }),
+    });
+    const data = await res.json().catch(() => null);
+    setLog(`/v1/users/me/avatar -> HTTP ${res.status}\n${JSON.stringify(data, null, 2)}`);
+    if (res.ok && data?.avatarUrl) {
+      setAvatarUrl(data.avatarUrl);
+    }
   }
 
   return (
@@ -171,6 +192,36 @@ export function AuthTestPage() {
           <p>
             Logged in as <strong>{tokens.user.email}</strong> (org{' '}
             {tokens.user.organizationId})
+          </p>
+        )}
+      </section>
+
+      <section style={{ marginBottom: '2rem' }}>
+        <h2>Avatar</h2>
+        <label style={labelStyle}>
+          Image URL
+          <input
+            style={inputStyle}
+            value={avatarUrlInput}
+            onChange={(e) => setAvatarUrlInput(e.target.value)}
+          />
+        </label>
+        <button
+          style={tokens ? buttonStyle : disabledButtonStyle}
+          disabled={!tokens}
+          onClick={uploadAvatar}
+        >
+          Upload avatar
+        </button>
+        {avatarUrl && (
+          <p>
+            <img
+              src={avatarUrl}
+              alt="Uploaded avatar"
+              width={96}
+              height={96}
+              style={{ borderRadius: 8, marginTop: '0.75rem' }}
+            />
           </p>
         )}
       </section>
