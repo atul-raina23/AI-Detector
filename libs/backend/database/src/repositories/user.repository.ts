@@ -18,4 +18,15 @@ export class UserRepository extends TenantScopedRepository<User> {
       where: { organizationId, email: email.toLowerCase() },
     });
   }
+
+  async setAvatarUrl(
+    organizationId: string,
+    userId: string,
+    avatarUrl: string,
+  ): Promise<void> {
+    await this.model.update(
+      { avatarUrl },
+      { where: { organizationId, id: userId } },
+    );
+  }
 }

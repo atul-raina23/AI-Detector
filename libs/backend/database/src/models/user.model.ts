@@ -9,6 +9,7 @@ export interface UserAttributes {
   passwordHash: string | null;
   name: string;
   status: UserStatus;
+  avatarUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,7 +18,7 @@ export type UserCreationAttributes = Pick<
   UserAttributes,
   'organizationId' | 'email' | 'name'
 > &
-  Partial<Pick<UserAttributes, 'passwordHash' | 'status'>>;
+  Partial<Pick<UserAttributes, 'passwordHash' | 'status' | 'avatarUrl'>>;
 
 /**
  * An employee/person within an org (docs/04 §3). Email is unique per
@@ -41,4 +42,8 @@ export class User extends TenantModel<UserAttributes, UserCreationAttributes> {
   @Default(UserStatus.Invited)
   @Column(DataType.ENUM(...Object.values(UserStatus)))
   declare status: UserStatus;
+
+  /** Cloudinary secure_url for the user's uploaded avatar, if any. */
+  @Column(DataType.STRING(500))
+  declare avatarUrl: string | null;
 }
