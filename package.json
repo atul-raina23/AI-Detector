@@ -64,6 +64,7 @@
     "@nestjs/sequelize": "^11.0.1",
     "argon2": "^0.44.0",
     "axios": "^1.6.0",
+    "cloudinary": "^2.11.0",
     "pg": "^8.22.0",
     "pg-hstore": "^2.3.4",
     "react": "^19.0.0",
