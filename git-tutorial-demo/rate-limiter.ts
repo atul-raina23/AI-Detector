@@ -53,5 +53,15 @@ export class RateLimiter {
     const secondsNeeded = tokensNeeded / this.refillRatePerSecond;
     return Math.ceil(secondsNeeded * 1000);
   }
+
+  getRetryAfterSeconds(): number {
+    return Math.ceil(this.getTimeUntilNextTokenMs() / 1000);
+  }
+
+  updateCapacity(newCapacity: number): void {
+    this.capacity = newCapacity;
+    this.tokens = Math.min(this.tokens, newCapacity);
+  }
 }
+
 

@@ -57,3 +57,19 @@ export function isDateInRange(
   return targetTime >= startTime && targetTime <= endTime;
 }
 
+export function formatISOShortDate(dateInput: Date | string | number): string {
+  const date = new Date(dateInput);
+  return date.toISOString().split('T')[0];
+}
+
+export function isToday(dateInput: Date | string | number): boolean {
+  const date = new Date(dateInput);
+  const today = new Date();
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
+}
+
+
