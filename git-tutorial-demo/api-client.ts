@@ -90,5 +90,39 @@ export class ApiClient {
 
     return (await response.json()) as T;
   }
+
+  async put<T>(endpoint: string, body: unknown, options: RequestOptions = {}): Promise<T> {
+    const url = `${this.baseUrl}${endpoint}`;
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(this.token ? { Authorization: `Bearer ${this.token}` } : {}),
+      ...(options.headers as Record<string, string>),
+    };
+
+    const response = await fetch(url, {
+      ...options,
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+    }
+
+    return (await response.json()) as T;
+  }
+
+  static buildQueryString(params: Record<string, string | number | boolean | undefined>): string {
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined) {
+        searchParams.append(key, String(value));
+      }
+    }
+    const query = searchParams.toString();
+    return query ? `?${query}` : '';
+  }
 }
+
 
