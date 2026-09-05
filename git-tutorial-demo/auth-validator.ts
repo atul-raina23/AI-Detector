@@ -80,3 +80,20 @@ export function validateUrl(url: string): ValidationResult {
   };
 }
 
+export function validatePhoneNumber(phone: string): ValidationResult {
+  const errors: string[] = [];
+  const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+
+  if (!phone || phone.trim() === '') {
+    errors.push('Phone number is required.');
+  } else if (!phoneRegex.test(phone.replace(/[\s()-]/g, ''))) {
+    errors.push('Please enter a valid E.164 phone number.');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
+
