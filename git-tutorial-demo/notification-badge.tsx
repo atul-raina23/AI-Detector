@@ -11,6 +11,8 @@ export interface NotificationBadgeProps {
   showPulse?: boolean;
   variant?: 'danger' | 'primary' | 'warning' | 'success';
   size?: 'sm' | 'md' | 'lg';
+  dotOnly?: boolean;
+  title?: string;
 }
 
 const variantColors = {
@@ -32,6 +34,8 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
   showPulse = false,
   variant = 'danger',
   size = 'md',
+  dotOnly = false,
+  title,
 }) => {
   if (count <= 0) return null;
 
@@ -39,8 +43,23 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
   const currentSize = sizeStyles[size] || sizeStyles.md;
   const color = variantColors[variant] || variantColors.danger;
 
+  if (dotOnly) {
+    return (
+      <span
+        style={{
+          width: '8px',
+          height: '8px',
+          borderRadius: '50%',
+          backgroundColor: color,
+          display: 'inline-block',
+        }}
+        title={title || `${count} notifications`}
+      />
+    );
+  }
+
   return (
-    <div style={{ position: 'relative', display: 'inline-flex' }}>
+    <div style={{ position: 'relative', display: 'inline-flex' }} title={title}>
       <span
         style={{
           backgroundColor: color,
@@ -72,4 +91,5 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
     </div>
   );
 };
+
 
